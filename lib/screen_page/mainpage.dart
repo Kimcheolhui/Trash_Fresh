@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:permission_handler/permission_handler.dart';
+// import 'package:permission_handler/permission_handler.dart';
 
 class MainHome extends StatefulWidget {
   const MainHome({Key? key}) : super(key: key);
@@ -13,62 +13,40 @@ class MainHome extends StatefulWidget {
 class MainHomeState extends State<MainHome> {
   Completer<GoogleMapController> _controller = Completer();
 
-  // 행정동 좌표
-  double lon = 126.8415;
-  double lat = 35.2272;
-  LocationPermission permission = LocationPermission.always;
+  late LocationData lastknownlocation;
 
-  // 마커 리스트
-  List<Marker> _markers = [];
+  // 현재 위치 정보 얻기
+  void _getcurrentLocation() async {
+    final Location location = new Location();
 
-  // 현재 위치 정보에 대한 승인 여부 확인 및 승인을 받는 함수
-  _getPermission() {
-    if (permission != LocationPermission.always) {
-      Geolocator.requestPermission().then((LocationPermission value) {
-        setState(() {
-          permission = value;
-        });
-        print("나는 허락");
-      }).catchError((e) => print(e));
-    }
-  }
+    LocationData currentLocation;
+    double lat;
+    double lon;
 
-  callPermission() async {
-    await Permission.location.request();
-  }
+    currentLocation = await location.getLocation();
 
-  // 현재 위치 정보를 가져오는 함수
-  _getCurrentLocation() async {
-    print("나는 위치");
-    await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high,
-            forceAndroidLocationManager: true)
-        .then((position) {
-      setState(() {
-        lat = position.latitude;
-        lon = position.longitude;
-      });
-    }).catchError((e) {
-      print(e);
+    setState(() {
+      lastknownlocation = currentLocation;
     });
+    _moveCameraPosition(lastknownlocation);
+    _setMarker(lastknownlocation);
   }
 
-  // 현재 위치로 카메라 포지션을 옮기는 함수
-  _moveCameraPosition() async {
+  // 현재 위치로 카메라 포지션 옮기기
+  void _moveCameraPosition(LocationData lastknownlocation) async {
     final GoogleMapController controller = await _controller.future;
-    await controller.animateCamera(CameraUpdate.newCameraPosition(
+    controller.animateCamera(CameraUpdate.newCameraPosition(
       CameraPosition(
-        target: LatLng(lat, lon),
-        zoom: 17.0,
+        bearing: 0,
+        target:
+            LatLng(lastknownlocation.latitude!, lastknownlocation.longitude!),
+        zoom: 17,
       ),
     ));
   }
 
-  // Marker marker = new Marker(markerId: "test", position: LatLng(latitude, longitude));
-
-  // 현재 위치에 마커 표시
-  _setMarker() async {
-    // final GoogleMapController controller = await _controller.future;
+  // 현재 위치에 마커를 표시
+  void _setMarker(LocationData lastknownlocation) async {
     for (int i = 0; i < _markers.length; i++) {
       if (_markers[i].markerId == "current") {
         _markers.remove(MarkerId("current"));
@@ -81,24 +59,23 @@ class MainHomeState extends State<MainHome> {
           markerId: MarkerId("current"),
           draggable: true,
           onTap: () => print("Now you are here!"),
-          position: LatLng(lat, lon),
+          position:
+              LatLng(lastknownlocation.latitude!, lastknownlocation.longitude!),
           icon: BitmapDescriptor.defaultMarkerWithHue(180),
         ),
       );
     });
   }
 
+  // 마커 리스트
+  List<Marker> _markers = [];
+
+  // 현재 위치에 마커 표시
+
   @override
   void initState() {
     super.initState();
-    callPermission();
-    _getCurrentLocation();
-    // 마커 추가
-    // _markers.add(Marker(
-    //     markerId: MarkerId("current"),
-    //     draggable: true,
-    //     onTap: () => print("Marker"),
-    //     position: LatLng(lat, lon)));
+    _getcurrentLocation();
   }
 
   static final CameraPosition _initialCameraPosition = CameraPosition(
@@ -122,11 +99,7 @@ class MainHomeState extends State<MainHome> {
       floatingActionButton: FloatingActionButton(
         elevation: 0,
         onPressed: () {
-          _getPermission();
-          // callPermission();
-          _getCurrentLocation();
-          _moveCameraPosition();
-          _setMarker();
+          _getcurrentLocation();
         },
         child: Image(
           image: AssetImage("assets/location_icon.png"),

@@ -1,16 +1,12 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:find_trashcan/screen_page/location.dart';
+import 'package:find_trashcan/screen_page/bottombar.dart';
 // import 'package:permission_handler/permission_handler.dart';
-
-class UserLocation {
-  LocationData? currentlocation;
-  double? latitude;
-  double? longitude;
-
-  UserLocation({this.latitude, this.longitude, this.currentlocation});
-}
 
 class MapHome extends StatefulWidget {
   const MapHome({Key? key}) : super(key: key);
@@ -24,7 +20,6 @@ class MapHomeState extends State<MapHome> {
 
   UserLocation mylocation = UserLocation();
   Location location = Location();
-  // Set<Marker> currentMarker = {};
 
   static CameraPosition initialCameraPosition = const CameraPosition(
     target: LatLng(35.2288, 126.8475),
@@ -37,7 +32,7 @@ class MapHomeState extends State<MapHome> {
     setState(() {
       currentMarker.remove(Marker(markerId: MarkerId("current")));
       currentMarker.add(Marker(
-        markerId: MarkerId("current"),
+        markerId: const MarkerId("current"),
         draggable: false,
         onTap: () {},
         position: LatLng(mylocation.currentlocation!.latitude!,
@@ -45,29 +40,20 @@ class MapHomeState extends State<MapHome> {
         icon: BitmapDescriptor.defaultMarkerWithHue(180),
       ));
     });
-    print(currentMarker);
   }
 
   void _onMapCreated(GoogleMapController ctrlr) async {
     _controller.complete(ctrlr);
 
-    final GoogleMapController controller = await _controller.future;
-
     location.onLocationChanged.listen((userlocation) {
       mylocation.currentlocation = userlocation;
-      // mylocation.latitude = userlocation.latitude;
-      // mylocation.longitude = userlocation.longitude;
-
-      // 사용자가 다른 부분을 계속 보고싶을 수도 있으니까 이건 빼자
-      // moveCameraPosition();
+      mylocation.latitude = userlocation.latitude;
+      mylocation.longitude = userlocation.longitude;
       currentMarkerUpdate();
-      print(currentMarker);
     });
   }
 
   void getCurrentLocation() async {
-    final GoogleMapController controller = await _controller.future;
-
     bool _serviceEnabled;
     PermissionStatus _permissionGranted;
 
@@ -88,19 +74,10 @@ class MapHomeState extends State<MapHome> {
     }
 
     try {
-      // LocationData _currentPosition = await location.getLocation();
       mylocation.currentlocation = await location.getLocation();
-
-      // mylocation.latitude = _currentPosition.latitude;
-      // mylocation.latitude = _currentPosition.longitude;
     } catch (error) {
       print(error);
     }
-
-    // _initialCameraPosition = CameraPosition(
-    //   target: LatLng(mylocation.latitude!, mylocation.longitude!),
-    //   zoom: 18,
-    // );
   }
 
   // 현재 위치로 카메라 포지션 옮기기
@@ -132,27 +109,46 @@ class MapHomeState extends State<MapHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: Colors.transparent,
-      body: GoogleMap(
-        mapType: MapType.normal,
-        initialCameraPosition: initialCameraPosition,
-        onMapCreated: _onMapCreated,
-        zoomGesturesEnabled: true,
-        markers: currentMarker, //Set.from(_markers)
-        zoomControlsEnabled: false,
-      ),
-      floatingActionButton: FloatingActionButton(
-        elevation: 0,
-        onPressed: () {
-          getCurrentLocation();
-          currentMarkerUpdate();
-          moveCameraPosition();
-        },
-        child: Image(
-          image: AssetImage("assets/location_icon.png"),
+        body: Stack(
+      children: [
+        GoogleMap(
+          mapType: MapType.normal,
+          initialCameraPosition: initialCameraPosition,
+          onMapCreated: _onMapCreated,
+          zoomGesturesEnabled: true,
+          markers: currentMarker, //Set.from(_markers)
+          zoomControlsEnabled: false,
         ),
-        backgroundColor: Colors.transparent,
-      ),
-    );
+        Positioned(
+          right: 20,
+          bottom: 90,
+          child: InkWell(
+            child: Container(
+              height: 60,
+              width: 60,
+              decoration: BoxDecoration(
+                color: Color(0xff4B9B77),
+                borderRadius: BorderRadius.all(
+                  Radius.circular(180.0),
+                ),
+              ),
+              child: Center(
+                child: Image.asset(
+                  "assets/location_icon.png",
+                  width: 45,
+                  height: 45,
+                ),
+              ),
+            ),
+            onTap: () {
+              getCurrentLocation();
+              currentMarkerUpdate();
+              moveCameraPosition();
+            },
+          ),
+        ),
+        BottomBar(),
+      ],
+    ));
   }
 }

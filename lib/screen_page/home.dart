@@ -1,9 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
-// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:find_trashcan/screen_page/login.dart';
-// import 'package:find_trashcan/screen_page/maphome.dart';
 
 class Home extends StatelessWidget {
   const Home({Key? key}) : super(key: key);
@@ -12,7 +10,7 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.green,
+        backgroundColor: Color(0xff4B9B77),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:find_trashcan/theme.dart';
-import 'package:find_trashcan/screen_page/home.dart';
+import 'package:find_trashcan/screen_page/login/login_home.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       title: 'Find Trash Can',
       theme: theme(),
       debugShowCheckedModeBanner: false,
-      home: Home(),
+      home: LoginHome(),
     );
   }
 }

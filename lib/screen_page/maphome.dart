@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -27,7 +27,7 @@ class MapHomeState extends State<MapHome> {
 
   // 초기 위치 설정
   static CameraPosition initialCameraPosition = const CameraPosition(
-    target: LatLng(35.2288, 126.8475),
+    target: LatLng(35.5276, 127.0406),
     zoom: 17,
   );
 
@@ -75,6 +75,13 @@ class MapHomeState extends State<MapHome> {
     });
     sumMarker();
   }
+
+  //
+  double opacity_normal = 1;
+  double opacity_recycle = 0.5;
+  double opacity_food = 0.5;
+  double opacity_battery = 0.5;
+  double opacity_cloth = 0.5;
 
   // 사용자가 쓰레기통을 추가할 건지 묻는 팝업창
   void checkAddMarker(LatLng pos) async {
@@ -181,7 +188,7 @@ class MapHomeState extends State<MapHome> {
     });
 
     // 수정할 수 있을 것 같은데? $사용해서
-    if (currentTrashType == "") {
+    if (currentTrashType == "normal") {
       trashcanMarkerUpdate(normaltrashcanInfo);
     } else if (currentTrashType == "recycle") {
       trashcanMarkerUpdate(recycletrashcanInfo);
@@ -260,6 +267,7 @@ class MapHomeState extends State<MapHome> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
+        // 구글맵
         GoogleMap(
           mapType: MapType.normal,
           initialCameraPosition: initialCameraPosition,
@@ -270,24 +278,28 @@ class MapHomeState extends State<MapHome> {
           zoomControlsEnabled: false,
           myLocationButtonEnabled: false,
         ),
+        // 현재 위치 설정 버튼
         Positioned(
-          right: 20,
+          left: 20,
           bottom: 20,
           child: InkWell(
-            child: Container(
-              height: 60,
-              width: 60,
-              decoration: BoxDecoration(
-                color: Color(0xff4B9B77),
-                borderRadius: BorderRadius.all(
-                  Radius.circular(180.0),
+            child: Opacity(
+              opacity: 0.65,
+              child: Container(
+                height: 60,
+                width: 60,
+                decoration: BoxDecoration(
+                  color: Color(0xff4B9B77),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(180.0),
+                  ),
                 ),
-              ),
-              child: Center(
-                child: Image.asset(
-                  "assets/location_icon.png",
-                  width: 45,
-                  height: 45,
+                child: Center(
+                  child: Image.asset(
+                    "assets/location_icon.png",
+                    width: 45,
+                    height: 45,
+                  ),
                 ),
               ),
             ),
@@ -298,147 +310,207 @@ class MapHomeState extends State<MapHome> {
             },
           ),
         ),
+        // 쓰레기통 종류 선택 버튼
         Positioned(
-          left: 10,
-          top: 60,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              SizedBox.fromSize(size: Size(10, 10)),
-              SizedBox.fromSize(
-                size: Size(55, 30),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(15.0),
-                  child: Material(
-                    color: Colors.yellow[700],
-                    child: InkWell(
-                      onTap: () {
-                        trashcanMarkerUpdate(normaltrashcanInfo);
-                        currentTrashType = "normal";
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Icon(Icons.miscellaneous_services,
-                              size: 13, color: Colors.white), // <-- Icon
-                          Text("일반",
-                              style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.white)), // <-- Text
-                        ],
+          left: 0,
+          top: 50,
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: 30,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                SizedBox(
+                  width: 55,
+                  height: 30,
+                  child: Opacity(
+                    opacity: opacity_normal,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(15.0),
+                      child: Material(
+                        color: Colors.yellow[700],
+                        child: InkWell(
+                          onTap: () {
+                            trashcanMarkerUpdate(normaltrashcanInfo);
+                            setState(() {
+                              currentTrashType = "normal";
+                              opacity_normal = 1;
+                              opacity_recycle = 0.5;
+                              opacity_food = 0.5;
+                              opacity_battery = 0.5;
+                              opacity_cloth = 0.5;
+                            });
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Icon(Icons.miscellaneous_services,
+                                  size: 13, color: Colors.white),
+                              Text("일반",
+                                  style: TextStyle(
+                                      fontSize: 13, color: Colors.white)),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox.fromSize(
-                size: Size(65, 30),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(15.0),
-                  child: Material(
-                    color: Colors.green[400],
-                    child: InkWell(
-                      onTap: () {
-                        trashcanMarkerUpdate(recycletrashcanInfo);
-                        currentTrashType = "recycle";
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Icon(Icons.eco_outlined,
-                              size: 13, color: Colors.white), // <-- Icon
-                          Text(
-                            "재활용",
-                            style: TextStyle(fontSize: 13, color: Colors.white),
-                          ), // <-- Text
-                        ],
+                SizedBox(
+                  width: 65,
+                  height: 30,
+                  child: Opacity(
+                    opacity: opacity_recycle,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(15.0),
+                      child: Material(
+                        color: Colors.green[400],
+                        child: InkWell(
+                          onTap: () {
+                            trashcanMarkerUpdate(recycletrashcanInfo);
+                            setState(() {
+                              currentTrashType = "recycle";
+                              opacity_normal = 0.5;
+                              opacity_recycle = 1;
+                              opacity_food = 0.5;
+                              opacity_battery = 0.5;
+                              opacity_cloth = 0.5;
+                            });
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Icon(Icons.eco_outlined,
+                                  size: 13, color: Colors.white),
+                              Text(
+                                "재활용",
+                                style: TextStyle(
+                                    fontSize: 13, color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox.fromSize(
-                size: Size(65, 30),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(15.0),
-                  child: Material(
-                    color: Colors.blue[600],
-                    child: InkWell(
-                      splashColor: Colors.green,
-                      onTap: () {
-                        trashcanMarkerUpdate(foodtrashcanInfo);
-                        currentTrashType = "food";
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Icon(Icons.invert_colors,
-                              size: 13, color: Colors.white), // <-- Icon
-                          Text(
-                            "음식물",
-                            style: TextStyle(fontSize: 13, color: Colors.white),
-                          ), // <-- Text
-                        ],
+                SizedBox(
+                  width: 65,
+                  height: 30,
+                  child: Opacity(
+                    opacity: opacity_food,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(15.0),
+                      child: Material(
+                        color: Colors.blue[600],
+                        child: InkWell(
+                          splashColor: Colors.green,
+                          onTap: () {
+                            trashcanMarkerUpdate(foodtrashcanInfo);
+                            setState(() {
+                              currentTrashType = "food";
+                              opacity_normal = 0.5;
+                              opacity_recycle = 0.5;
+                              opacity_food = 1;
+                              opacity_battery = 0.5;
+                              opacity_cloth = 0.5;
+                            });
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Icon(Icons.invert_colors,
+                                  size: 13, color: Colors.white),
+                              Text(
+                                "음식물",
+                                style: TextStyle(
+                                    fontSize: 13, color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox.fromSize(
-                size: Size(65, 30),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(15.0),
-                  child: Material(
-                    color: Colors.red[500],
-                    child: InkWell(
-                      onTap: () {
-                        trashcanMarkerUpdate(batterytrashcanInfo);
-                        currentTrashType = "battery";
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Icon(Icons.battery_std_sharp,
-                              size: 13, color: Colors.white), // <-- Icon
-                          Text(
-                            "건전지",
-                            style: TextStyle(fontSize: 13, color: Colors.white),
-                          ), // <-- Text
-                        ],
+                SizedBox(
+                  width: 65,
+                  height: 30,
+                  child: Opacity(
+                    opacity: opacity_battery,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(15.0),
+                      child: Material(
+                        color: Colors.red[500],
+                        child: InkWell(
+                          onTap: () {
+                            trashcanMarkerUpdate(batterytrashcanInfo);
+                            setState(() {
+                              currentTrashType = "battery";
+                              opacity_normal = 0.5;
+                              opacity_recycle = 0.5;
+                              opacity_food = 0.5;
+                              opacity_battery = 1;
+                              opacity_cloth = 0.5;
+                            });
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Icon(Icons.battery_std_sharp,
+                                  size: 13, color: Colors.white),
+                              Text(
+                                "건전지",
+                                style: TextStyle(
+                                    fontSize: 13, color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox.fromSize(
-                size: Size(55, 30),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(15.0),
-                  child: Material(
-                    color: Colors.green[700],
-                    child: InkWell(
-                      onTap: () {
-                        trashcanMarkerUpdate(clothtrashcanInfo);
-                        currentTrashType = "cloth";
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Icon(Icons.local_mall_sharp,
-                              size: 13, color: Colors.white), // <-- Icon
-                          Text(
-                            "의류",
-                            style: TextStyle(fontSize: 13, color: Colors.white),
-                          ), // <-- Text
-                        ],
+                SizedBox(
+                  width: 65,
+                  height: 30,
+                  child: Opacity(
+                    opacity: opacity_cloth,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(15.0),
+                      child: Material(
+                        color: Colors.green[700],
+                        child: InkWell(
+                          onTap: () {
+                            trashcanMarkerUpdate(clothtrashcanInfo);
+                            setState(() {
+                              currentTrashType = "cloth";
+                              opacity_normal = 0.5;
+                              opacity_recycle = 0.5;
+                              opacity_food = 0.5;
+                              opacity_battery = 0.5;
+                              opacity_cloth = 1;
+                            });
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Icon(Icons.local_mall_sharp,
+                                  size: 13, color: Colors.white),
+                              Text(
+                                "의류",
+                                style: TextStyle(
+                                    fontSize: 13, color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox.fromSize(
-                  size: Size(MediaQuery.of(context).size.width - 330, 1)),
-            ],
+              ],
+            ),
           ),
         ),
       ],
